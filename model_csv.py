@@ -7,6 +7,7 @@ from keras.layers.convolutional import Conv2D
 from keras.layers.convolutional import MaxPooling2D
 from keras.metrics import categorical_accuracy
 from keras.models import model_from_json
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 import itertools
@@ -16,7 +17,6 @@ import matplotlib.pyplot as plt
 
 filename = 'images_all.csv'
 label_map = ['angry', 'sad', 'surprised', 'happy']
-
 
 def getData(filename):
     # images are 48x48
@@ -137,6 +137,7 @@ def model2(num_class): #softmax na koncu, dropout 0.25, 4 conv, 2fc
 
     opt = Adam(lr=0.0001)
     model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
+    return model
 
 def model3(num_class): #softmax na koncu, dropout 0.25, 3conv, 3fc
     model = Sequential()
@@ -187,6 +188,7 @@ def model3(num_class): #softmax na koncu, dropout 0.25, 3conv, 3fc
 
     opt = Adam(lr=0.0001)
     model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
+    return model
 
 def model4(num_class): #tylko conv, bez fc
     model = Sequential()
@@ -269,6 +271,7 @@ def model4(num_class): #tylko conv, bez fc
 
     opt = Adam(lr=0.0001)
     model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
+    return model
 
 def model5(num_class): #czy dobrze rozumiem ten graf?
     model = Sequential()
@@ -369,6 +372,7 @@ def model5(num_class): #czy dobrze rozumiem ten graf?
 
     opt = Adam(lr=0.0001)
     model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
+    return model
 
 def plot_results(history, epoch):
     plt.figure(figsize=(20,10))
@@ -430,13 +434,16 @@ def show_confusion_matrix(y_test, y_pred, label_map):
     plt.show()
 
 def train(model, epochs, X_train, y_train, X_test, y_test):
+    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=200)
+    mc = ModelCheckpoint('best_model.h5', monitor='val_accuracy', mode='max', verbose=1, save_best_only=True)
     for el in epochs:
         history = model.fit(X_train, y_train,
                 batch_size=128,
                 epochs=el,
                 verbose=2,
-                validation_split=0.12)
-        
+                validation_data=(X_test, y_test),
+                callbacks=[es, mc])
+
         model_json = model.to_json()
         with open("model_"+str(el)+".json", "w") as json_file:
             json_file.write(model_json)
@@ -444,11 +451,13 @@ def train(model, epochs, X_train, y_train, X_test, y_test):
         model.save_weights("model_"+str(el)+"weigths.h5")
         print("Saved model to disk")
 
+        model.save('model_'+str(el)+'.h5')
         plot_results(history, el)
-        score = model.predict(X_test)
+        #score = model.predict(X_test)
         print(model.summary())
         pred = show_classification_report(model, X_test, y_test)
         show_confusion_matrix(y_test, pred, label_map)
+        
 
 X, Y = getData(filename)
 num_class = len(set(Y))
@@ -466,6 +475,5 @@ model = model2(num_class)
 model = model3(num_class)
 model = model4(num_class)
 model = model5(num_class)
-train(model, epochs, X_train, y_train, X_test, y_test)
 
-data = pd.read_csv('fer2013.csv')
+train(model, epochs, X_train, y_train, X_test, y_test)
