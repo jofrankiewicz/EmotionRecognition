@@ -265,7 +265,7 @@ def model4(num_class): #tylko conv, bez fc
     model.add(Dropout(0.25))
     
     # Flattening
-    #model.add(Flatten()) ???
+    model.add(Flatten()) 
 
     model.add(Dense(num_class, activation='softmax'))
 
@@ -366,8 +366,8 @@ def model5(num_class): #czy dobrze rozumiem ten graf?
     model.add(Dropout(0.25))
     
     # Flattening
-    #model.add(Flatten()) ???
-
+    model.add(Flatten()) 
+    
     model.add(Dense(num_class, activation='softmax'))
 
     opt = Adam(lr=0.0001)
