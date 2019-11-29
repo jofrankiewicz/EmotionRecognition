@@ -1,0 +1,14 @@
+#!/bin/sh
+#SBATCH --job-name=model2.job
+#SBATCH --output=/home/jfrankiewicz/scripts/.out_model2/model2.out
+#SBATCH --error=/home/jfrankiewicz/scripts/.out_model2/model2.err
+#SBATCH --time=26-00:00
+#SBATCH --partition=k40
+#SBATCH --mem=12000
+#SBATCH --qos=normal
+
+
+module load cuda/9.0
+source /home/jfrankiewicz/jfrankiewicz-tf1.12/bin/activate
+
+python /home/jfrankiewicz/scripts/model2.py

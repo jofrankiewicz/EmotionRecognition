@@ -1,0 +1,12 @@
+#!/bin/sh
+#SBATCH --job-name=model5.job
+#SBATCH --output=/home/jfrankiewicz/scripts/.out_model5_2/model5.out
+#SBATCH --error=/home/jfrankiewicz/scripts/.out_model5_2/model5.err
+#SBATCH --time=26-00:00
+#SBATCH --partition=k40
+#SBATCH --mem=12000
+#SBATCH --qos=normal
+
+module load cuda/9.0
+source /home/jfrankiewicz/jfrankiewicz/bin/activate
+python /home/jfrankiewicz/scripts/model5.py
